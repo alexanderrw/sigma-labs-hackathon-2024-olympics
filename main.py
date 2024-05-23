@@ -1,3 +1,6 @@
+from core import ui
+
+
 def main() -> None:
     ...
 
