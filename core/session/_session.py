@@ -9,3 +9,6 @@ from core.connections import get_snowpark_session
 class Session:
     snowpark_session: SnowparkSession = field(default_factory=get_snowpark_session)
     current_user_id: Optional[int] = None
+
+    def __post_init__(self):
+        print("Making new session...")
