@@ -74,6 +74,7 @@ class LoginSignupPage(PageABC):
 			if user_id:
 				st.success(f"Logged in as {username}")
 				self.session.current_user_id = user_id
+				print(f"2 {self.session.current_user_id=}")
 			else:
 				st.warning("Incorrect username or password")
 
@@ -85,6 +86,7 @@ class LoginSignupPage(PageABC):
 			st.success("You have successfully created an account")
 
 		if sign_out_button:
+			print("Signing out via button")
 			self.session.current_user_id = None
 			st.success("You have signed out")
 
