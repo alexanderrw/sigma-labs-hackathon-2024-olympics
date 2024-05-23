@@ -52,7 +52,7 @@ class LoginSignupPage(PageABC):
 		st.title(self.title)
 
 		username = st.text_input("Username")
-		password = st.text_input("Password", type='string')
+		password = st.text_input("Password", type='password')
 		password_hash = self._string_sha256(password)
 
 		if st.button("Login"):

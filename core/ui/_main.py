@@ -12,14 +12,16 @@ class App:
     def __init__(self, session: Session) -> None:
         self._session = session
         kwargs = {"session": self._session}
-        self._pages = [
+        self._pages: list[PageABC] = [
             LoginSignupPage(**kwargs),
         ]
 
     def run(self) -> None:
-        page: PageABC = st.sidebar.selectbox(
-            title="App Navigation",
-            options=self._pages,
-            format_func=lambda p: p.title
+        number_of_pages = len(self._pages)
+        page_number = st.sidebar.selectbox(
+            label="Select page",
+            options=range(number_of_pages),
+            format_func=lambda page_no: self._pages[page_no].title
         )
+        page = self._pages[page_number]
         page.run()
