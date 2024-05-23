@@ -14,8 +14,25 @@ def get_number_of_points_for_first_place(results_dataframe: pd.DataFrame) -> flo
     return first_place_points
 
 
-def get_points(results_dataframe: pd.DataFrame) -> pd.DataFrame:
+def get_available_points(results_dataframe: pd.DataFrame) -> pd.Series:
     results_dataframe_with_points = results_dataframe.copy()
     first_place_points = get_number_of_points_for_first_place(results_dataframe_with_points)
-    results_dataframe_with_points['points'] = first_place_points / results_dataframe_with_points['rank_position']
-    return results_dataframe_with_points
+    return first_place_points / results_dataframe_with_points['rank_position']
+
+def get_user_correct_answers(user_prediction: pd.DataFrame, event_id):
+    session.sql("""
+        SELECT (
+            CASE WHEN SELECTIONS.SELECTION_RANKING = RESULTS.RANK_POSITION THEN 1
+            ELSE 0
+        )
+            FROM ATHLETESELECTIONS_T AS SELECTIONS
+            LEFT JOIN TOKYO_EVENTS AS RESULTS ON
+                RESULTS.EVENT_ID = SELECTIONS.EVENT_ID AND
+                RESULTS.ATHLETE_ID = SELECTIONS.ATHLETE_ID AND
+            WHERE RESULTS.EVENT_ID = {event_id} AND SELECTIONS.USER_ID = {user_id}
+
+         
+    """)
+
+
+
