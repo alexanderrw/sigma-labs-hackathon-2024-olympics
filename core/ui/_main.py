@@ -1,11 +1,10 @@
-from snowflake.snowpark import Session
-
 import streamlit as st
 
 from ._pages import (
     LoginSignupPage,
 )
 from ._pages.abc import PageABC
+from core.session import Session
 
 
 class App:

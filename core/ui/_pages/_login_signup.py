@@ -1,38 +1,24 @@
-from snowflake.snowpark import Row
 from hashlib import sha256
+from typing import Optional
 
 import streamlit as st
 
-from core.ui._pages.abc import PageABC
+from .abc import PageABC
 
 
 class LoginSignupPage(PageABC):
-	def __init__(self, *args, **kwargs):
-		super().__init__(*args, **kwargs)
-		self._create_account_table()
-
 	@property
 	def title(self) -> str:
 		return "Login / Sign-up"
 
-	def _create_account_table(self) -> None:
-		self.session.sql(
-			"""
-			CREATE TABLE IF NOT EXISTS ACCOUNT_TABLE(
-					user VARCHAR,
-					password_hash VARCHAR
-			)
-			"""
-		).collect()
-
 	def _create_new_user(
 		self,
 		username: str,
-		password: str,
+		password_hash: str,
 	) -> None:
-		self.session.sql(
+		self.session.snowpark_session.sql(
 			f"""
-			INSERT INTO ACCOUNT_TABLE VALUES('{username}', '{password}')
+			INSERT INTO USERS_T(username, password_hash) VALUES('{username}', '{password_hash}')
 			"""
 		).collect()
 
@@ -40,13 +26,19 @@ class LoginSignupPage(PageABC):
 		self,
 		username: str,
 		password_hash: str,
-	) -> list[Row]:
-		dataframe = self.session.sql(
+	) -> Optional[int]:
+		current_user = self.session.snowpark_session.sql(
 			f"""
-			SELECT * FROM ACCOUNT_TABLE WHERE USER = '{username}' AND PASSWORD = '{password_hash}'
+			SELECT user_id FROM USERS_T WHERE username = '{username}' AND password_hash = '{password_hash}'
+			QUALIFY row_number() OVER (
+				ORDER BY lastupdated_timestamp DESC
+			) = 1
 			"""
 		).collect()
-		return dataframe
+		if not current_user:
+			return None
+		current_user_id = current_user[0][0]
+		return current_user_id
 
 	def run(self) -> None:
 		st.title(self.title)
@@ -56,17 +48,18 @@ class LoginSignupPage(PageABC):
 		password_hash = self._string_sha256(password)
 
 		if st.button("Login"):
-			result = self._log_in_user(
+			user_id = self._log_in_user(
 				username=username,
 				password_hash=password_hash,
 			)
-			if result:
+			if user_id:
 				st.success(f"Logged in as {username}")
+				self.session.current_user_id = user_id
 			else:
 				st.warning("Incorrect username or password")
 
 		if st.button("Sign-up"):
-			self._log_in_user(
+			self._create_new_user(
 				username=username,
 				password_hash=password_hash,
 			)

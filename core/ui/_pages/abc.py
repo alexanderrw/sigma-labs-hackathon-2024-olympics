@@ -1,5 +1,6 @@
-from snowflake.snowpark import Session
 from abc import ABC, abstractmethod
+
+from core.session import Session
 
 
 class PageABC(ABC):

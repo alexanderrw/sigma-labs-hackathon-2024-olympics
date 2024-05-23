@@ -1,13 +1,13 @@
 from dotenv import load_dotenv
 
-from core.connections import get_snowpark_session
+from core.session import Session
 from core.ui import App
 
 load_dotenv()
 
 
 def main() -> None:
-    session = get_snowpark_session()
+    session = Session()
     app = App(session=session)
     app.run()
 
