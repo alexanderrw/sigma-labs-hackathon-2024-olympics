@@ -11,8 +11,9 @@ from ._pages.abc import PageABC
 class App:
     def __init__(self, session: Session) -> None:
         self._session = session
+        kwargs = {"session": self._session}
         self._pages = [
-            LoginSignupPage()
+            LoginSignupPage(**kwargs),
         ]
 
     def run(self) -> None:

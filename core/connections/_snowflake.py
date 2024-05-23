@@ -6,9 +6,10 @@ def get_snowpark_session() -> Session:
     connection_parameters = {
         "account": getenv("ACCOUNT"),
         "user": getenv("USER"),
-        "__string": getenv("PASSWORD"),
+        "password": getenv("PASSWORD"),
         "database": getenv("DATABASE"),
         "schema": getenv("SCHEMA"),
     }
-    session = Session.builder.configs(connection_parameters).create()
+    builder = Session.builder.configs(options=connection_parameters)
+    session = builder.create()
     return session
