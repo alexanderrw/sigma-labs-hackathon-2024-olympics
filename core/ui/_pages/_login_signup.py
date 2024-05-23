@@ -43,11 +43,30 @@ class LoginSignupPage(PageABC):
 	def run(self) -> None:
 		st.title(self.title)
 
-		username = st.text_input("Username")
-		password = st.text_input("Password", type='password')
+		def is_logged_in() -> bool:
+			return bool(self.session.current_user_id)
+
+		username = st.text_input(label="Username")
+		password = st.text_input(
+			label="Password",
+			type="password",
+		)
 		password_hash = self._string_sha256(password)
 
-		if st.button("Login"):
+		login_button = st.button(
+			label="Login",
+			disabled=is_logged_in(),
+		)
+		sign_up_button = st.button(
+			label="Sign-up",
+			disabled=is_logged_in(),
+		)
+		sign_out_button = st.button(
+			label="Sign out",
+			disabled=(not is_logged_in())
+		)
+
+		if login_button:
 			user_id = self._log_in_user(
 				username=username,
 				password_hash=password_hash,
@@ -58,12 +77,16 @@ class LoginSignupPage(PageABC):
 			else:
 				st.warning("Incorrect username or password")
 
-		if st.button("Sign-up"):
+		if sign_up_button:
 			self._create_new_user(
 				username=username,
 				password_hash=password_hash,
 			)
 			st.success("You have successfully created an account")
+
+		if sign_out_button:
+			self.session.current_user_id = None
+			st.success("You have signed out")
 
 	@staticmethod
 	def _string_sha256(__string: str) -> str:
